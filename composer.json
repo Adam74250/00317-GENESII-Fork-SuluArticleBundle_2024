@@ -1,9 +1,9 @@
 {
-    "name": "sulu/article-bundle",
-    "description": "Bundle for managing localized content-rich entities like blog-posts in the Sulu content management system",
+    "name": "genesii/sulu-article-bundle",
+    "description": "Fork du bundle SuluArticleBundle pour SuluCMS par Genesii SAS.",
     "type": "sulu-bundle",
     "license": "MIT",
-    "homepage": "https://github.com/sulu/SuluArticleBundle",
+    "homepage": "https://github.com/Adam74250/00317-GENESII-Fork-SuluArticleBundle_2024",
     "keywords": [
         "articles",
         "sulu",
