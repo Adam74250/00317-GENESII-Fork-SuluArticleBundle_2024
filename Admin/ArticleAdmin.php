@@ -40,6 +40,8 @@ class ArticleAdmin extends Admin
 {
     use StructureTagTrait;
 
+    public const BASE_MENU_ITEMS_POSTIION = 20;
+
     public const STRUCTURE_TAG_TYPE = 'sulu_article.type';
 
     public const STRUCTURE_TAG_MULTIPAGE = 'sulu_article.multi_page';
@@ -146,12 +148,30 @@ class ArticleAdmin extends Admin
             return;
         }
 
-        $articleItem = new NavigationItem('sulu_article.articles');
-        $articleItem->setPosition(20);
-        $articleItem->setIcon('su-newspaper');
-        $articleItem->setView(static::LIST_VIEW);
+        $itemPosition = 0;
+        
+        foreach ($this->getTypes() as $typeKey => $articleTypeConfiguration) {
+            $articleItem = new NavigationItem('sulu_article.' . $typeKey . 's');
+            $articleItem->setPosition(self::BASE_MENU_ITEMS_POSTIION + $itemPosition);
+            $articleItem->setIcon($articleTypeConfiguration['icon']);
+            $articleItem->setView(static::LIST_VIEW . '_' . $typeKey);
+            $articleItem->setChildViews([
+                static::LIST_VIEW . '_' . $typeKey,
+                static::ADD_FORM_VIEW . '_' . $typeKey,
+                static::ADD_FORM_VIEW_DETAILS . '_' . $typeKey,
+                static::EDIT_FORM_VIEW . '_' . $typeKey,
+                static::EDIT_FORM_VIEW_DETAILS . '_' . $typeKey,
+                static::EDIT_FORM_VIEW_SEO . '_' . $typeKey,
+                static::EDIT_FORM_VIEW_EXCERPT . '_' . $typeKey,
+                static::EDIT_FORM_VIEW_SETTINGS . '_' . $typeKey,
+                static::EDIT_FORM_VIEW_AUTOMATION . '_' . $typeKey,
+                static::EDIT_FORM_VIEW_ACTIVITY . '_' . $typeKey,
+            ]);
 
-        $navigationItemCollection->add($articleItem);
+            $navigationItemCollection->add($articleItem);
+
+            $itemPosition++;
+        }
     }
 
     public function configureViews(ViewCollection $viewCollection): void
@@ -273,7 +293,7 @@ class ArticleAdmin extends Admin
                     ->setAddView(static::ADD_FORM_VIEW . '_' . $typeKey)
                     ->setEditView(static::EDIT_FORM_VIEW . '_' . $typeKey)
                     ->addToolbarActions($listToolbarActions)
-                    ->setParent(static::LIST_VIEW)
+                    //->setParent(static::LIST_VIEW)
             );
 
             $viewCollection->add(
@@ -464,10 +484,12 @@ class ArticleAdmin extends Admin
         foreach ($this->structureManager->getStructures('article') as $structure) {
             $type = $this->getType($structure->getStructure(), null);
             $typeKey = $type ?: 'default';
+            $icon = $this->getTagAttribute($structure->getStructure(), 'sulu_article.icon', 'icon', $typeKey);
             if (empty($types[$typeKey])) {
                 $types[$typeKey] = [
                     'type' => $type,
                     'default' => $structure->getKey(),
+                    'icon' => $icon,
                     'title' => $this->getTitle($typeKey),
                     'templates' => [],
                 ];
