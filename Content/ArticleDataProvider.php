@@ -17,6 +17,7 @@ use ONGR\ElasticsearchDSL\Query\MatchAllQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use ONGR\ElasticsearchDSL\Search;
 use ONGR\ElasticsearchDSL\Sort\FieldSort;
+use ONGR\ElasticsearchDSL\Query\FullText\MatchPhrasePrefixQuery;
 use ProxyManager\Factory\LazyLoadingValueHolderFactory;
 use ProxyManager\Proxy\LazyLoadingInterface;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
@@ -324,7 +325,7 @@ class ArticleDataProvider implements DataProviderInterface, DataProviderAliasInt
         $this->addBoolQuery('categories', $filters, 'excerpt.categories.id', $operator, $query, $queriesCount);
         $operator = $this->getFilter($filters, 'websiteCategoriesOperator', 'or');
         $this->addBoolQuery('websiteCategories', $filters, 'excerpt.categories.id', $operator, $query, $queriesCount);
-
+        
         if (null !== $locale) {
             $search->addQuery(new TermQuery('locale', $locale));
         }
@@ -349,6 +350,13 @@ class ArticleDataProvider implements DataProviderInterface, DataProviderAliasInt
             $search->addQuery(new MatchAllQuery(), BoolQuery::MUST);
         } else {
             $search->addQuery($query, BoolQuery::MUST);
+        }
+        
+        global $_GET;
+        if(isset($_GET['search']) && trim($_GET['search']) != '') {
+            $boolQuery = new BoolQuery();
+            $boolQuery->add(new MatchPhrasePrefixQuery('title', trim($_GET['search'])), BoolQuery::SHOULD);
+            $search->addQuery($boolQuery);
         }
 
         return $search;
