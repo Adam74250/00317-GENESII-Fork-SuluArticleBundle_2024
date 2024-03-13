@@ -18,6 +18,7 @@ use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use ONGR\ElasticsearchDSL\Search;
 use ONGR\ElasticsearchDSL\Sort\FieldSort;
 use ONGR\ElasticsearchDSL\Query\FullText\MatchPhrasePrefixQuery;
+use ONGR\ElasticsearchDSL\Query\FullText\MatchPhraseQuery;
 use ProxyManager\Factory\LazyLoadingValueHolderFactory;
 use ProxyManager\Proxy\LazyLoadingInterface;
 use Sulu\Bundle\AdminBundle\Metadata\FormMetadata\TypedFormMetadata;
@@ -355,7 +356,7 @@ class ArticleDataProvider implements DataProviderInterface, DataProviderAliasInt
         global $_GET;
         if(isset($_GET['search']) && trim($_GET['search']) != '') {
             $boolQuery = new BoolQuery();
-            $boolQuery->add(new MatchPhrasePrefixQuery('title', trim($_GET['search'])), BoolQuery::SHOULD);
+            $boolQuery->add(new MatchPhraseQuery('title', trim($_GET['search'])), BoolQuery::SHOULD);
             $search->addQuery($boolQuery);
         }
 
