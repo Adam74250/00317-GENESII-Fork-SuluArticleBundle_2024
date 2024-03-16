@@ -17,7 +17,7 @@ use ONGR\ElasticsearchDSL\Query\MatchAllQuery;
 use ONGR\ElasticsearchDSL\Query\TermLevel\TermQuery;
 use ONGR\ElasticsearchDSL\Search;
 use ONGR\ElasticsearchDSL\Sort\FieldSort;
-use ONGR\ElasticsearchDSL\Query\FullText\MatchPhrasePrefixQuery;
+use ONGR\ElasticsearchDSL\Query\FullText\QueryStringQuery;
 use ONGR\ElasticsearchDSL\Query\FullText\MatchPhraseQuery;
 use ProxyManager\Factory\LazyLoadingValueHolderFactory;
 use ProxyManager\Proxy\LazyLoadingInterface;
@@ -354,11 +354,22 @@ class ArticleDataProvider implements DataProviderInterface, DataProviderAliasInt
         }
         
         global $_GET;
-        if(isset($_GET['search']) && trim($_GET['search']) != '') {
-            $boolQuery = new BoolQuery();
-            $boolQuery->add(new MatchPhraseQuery('title', trim($_GET['search'])), BoolQuery::SHOULD);
-            $search->addQuery($boolQuery);
-        }
+		$searchTerm = isset($_GET['search']) ? $_GET['search'] : '';
+		$searchTerm = filter_var($searchTerm, FILTER_SANITIZE_STRING);
+		
+		if($searchTerm != '') {
+			$boolQuery = new BoolQuery();
+			if(substr_count($searchTerm, ' ') > 1) {
+				// For phrase searches
+				$boolQuery->add(new MatchPhraseQuery('title', $searchTerm));
+			} else {
+				// For single word searches or wildcard searches
+				$queryStringQuery = new QueryStringQuery('*'.$searchTerm.'*');
+				$queryStringQuery->addParameter('default_field', 'title');
+				$boolQuery->add($queryStringQuery);
+			}
+			$search->addQuery($boolQuery);
+		}
 
         return $search;
     }
