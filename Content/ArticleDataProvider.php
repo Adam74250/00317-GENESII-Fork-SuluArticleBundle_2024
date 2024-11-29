@@ -266,10 +266,15 @@ class ArticleDataProvider implements DataProviderInterface, DataProviderAliasInt
 
         $this->addPagination($search, $pageSize, $page, $limit);
 
-        if (\array_key_exists('sortBy', $filters)) {
+        // Forcer le tri par défaut par date du plus récent au plus ancien
+        $search->addSort(new FieldSort('authored', 'desc'));
+        /*
+        if (!\array_key_exists('sortBy', $filters)) {
+            $search->addSort(new FieldSort('authored', 'desc')); // Par défaut, trie par la date de création en ordre décroissant
+        } else {
             $sortMethod = \array_key_exists('sortMethod', $filters) ? $filters['sortMethod'] : 'asc';
             $search->addSort(new FieldSort($filters['sortBy'], $sortMethod));
-        }
+        }*/
 
         if ($webspaceKey) {
             $webspaceQuery = new BoolQuery();
